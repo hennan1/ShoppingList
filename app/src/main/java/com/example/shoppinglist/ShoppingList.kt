@@ -1,6 +1,7 @@
 package com.example.shoppinglist
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,12 +13,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -37,7 +44,7 @@ data class sItem(
     val id :Int,
     var name:String,
     var quantity:Int,
-    var isEdited:Boolean = false
+    var isEditing:Boolean = false
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -151,8 +158,66 @@ fun shoppingListItem(
             .border(
                 border = BorderStroke(2.dp, Color(0xff018786)),
                 shape = RoundedCornerShape(20)
-            )
+            ),
+        horizontalArrangement = Arrangement.SpaceBetween
     ){
-        Text(text = item.name, modifier = Modifier.padding(8.dp))
+        Text(text = item.name,
+            modifier = Modifier.padding(8.dp))
+        Text(text = item.quantity.toString(),
+            modifier = Modifier.padding(8.dp))
+        Row {
+            IconButton(onClick = onEditClick) {
+                Icon(imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit Button")
+            }
+            IconButton(onClick = onDeleteClick) {
+                Icon(imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete Button")
+
+            }
+        }
+
+    }
+}
+
+@Composable
+fun editItem(item:sItem,onEditComplete:(String,Int)->Unit){
+    var editedName by remember { mutableStateOf(item.name)}
+    var editedQuantity by remember { mutableStateOf(item.quantity.toString())}
+    var isEditing by remember { mutableStateOf(item.isEditing)}
+
+    Row (
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ){
+        Column {
+            OutlinedTextField(
+                value = editedName,
+                onValueChange = {editedName = it},
+                singleLine = true,
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(8.dp)
+                )
+            OutlinedTextField(
+                value = editedQuantity,
+                onValueChange = {editedQuantity = it},
+                singleLine = true,
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(8.dp)
+            )
+
+        }
+        Button(
+            onClick = {
+                isEditing = false
+                onEditComplete(editedName,editedQuantity.toIntOrNull()?:1)
+        }) {
+            Text("Save")
+        }
     }
 }
