@@ -74,7 +74,29 @@ fun shoppingList(){
                 .padding(16.dp)
         ){
             items(shopItem){
-                shoppingListItem( it,{},{})
+                item ->
+                if (item.isEditing){
+                    editItem(item = item, onEditComplete = {
+                        editedName,editedQuanity ->
+                        shopItem = shopItem.map { it.copy(isEditing = false) }
+                        val editedItem = shopItem.find { it.id == item.id }
+                        editedItem?.let{
+                            it.name = editedName
+                            it.quantity = editedQuanity
+                            it.isEditing = false
+                        }
+                    })
+                }else{
+                    shoppingListItem(item = item, onEditClick = {
+                        // The line below helps us map the item being edited  and the item
+                        // at which the edit button was clicked
+                        shopItem = shopItem.map { it.copy( isEditing = it.id == item.id) }
+                    }, onDeleteClick = {
+                        shopItem = shopItem-item
+                    })
+                    
+                }
+
 
             }
 
@@ -190,7 +212,10 @@ fun editItem(item:sItem,onEditComplete:(String,Int)->Unit){
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding(8.dp),
+            .padding(8.dp).border(
+                border = BorderStroke(2.dp,Color.Black),
+                shape = RoundedCornerShape(20)
+            ),
         horizontalArrangement = Arrangement.SpaceEvenly
     ){
         Column {
@@ -201,6 +226,7 @@ fun editItem(item:sItem,onEditComplete:(String,Int)->Unit){
                 modifier = Modifier
                     .wrapContentSize()
                     .padding(8.dp)
+                    .width(128.dp)
                 )
             OutlinedTextField(
                 value = editedQuantity,
@@ -209,6 +235,7 @@ fun editItem(item:sItem,onEditComplete:(String,Int)->Unit){
                 modifier = Modifier
                     .wrapContentSize()
                     .padding(8.dp)
+                    .width(128.dp)
             )
 
         }
@@ -217,7 +244,7 @@ fun editItem(item:sItem,onEditComplete:(String,Int)->Unit){
                 isEditing = false
                 onEditComplete(editedName,editedQuantity.toIntOrNull()?:1)
         }) {
-            Text("Save")
+            Text(text = "Save")
         }
     }
 }
